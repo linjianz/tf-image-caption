@@ -22,7 +22,7 @@ layer_name = 'pool5/7x7_s1'
 sys.path.insert(0, caffe_root + 'python')
 import caffe
 
-caffe.set_mode_gpu()
+caffe.set_mode_cpu()
 net = caffe.Classifier(model_prototxt, model_trained,
                        mean=np.load(mean_path).mean(1).mean(1),
                        channel_swap=(2, 1, 0),
@@ -106,5 +106,9 @@ def transform_val_pickle():
 
     pickle.dump(image_id2feature, open('data/val_{:d}.pkl'.format(len(image_ids)), 'wb'), -1)
 
+
 if __name__ == "__main__":
-    transform_train_pickle()
+    # transform_train_pickle()
+    image_vector = forward_cnn('images/pizza.jpg')
+    pickle.dump(image_vector, open('data/image-features-test/pizza.pkl', 'wb'), -1)
+

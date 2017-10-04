@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import json
-import nltk 
+import nltk
 # nltk.download('punkt')
 
 
