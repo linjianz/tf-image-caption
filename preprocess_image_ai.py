@@ -1,8 +1,19 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+"""
+Author: Linjian Zhang
+Email: linjian93@foxmail.com
+Create Time: 2017-10-05 14:25:39
+Program: convert image to vector
+Description:
+Convert all the images in train/validation/test set to vectors.
+Use the pre-trained model of googlenet by caffe.
+the result is saved as a list of dict, such as {image_id: image_vector}
+"""
 import numpy as np
-import os, sys, getopt
+import os
+import sys
 from tqdm import tqdm
-import glob
-import scipy.io as sio
 import json
 import pickle
 
@@ -45,9 +56,6 @@ def forward_cnn(image_path):
 
 
 def convert_image_to_vector_train():
-    """
-    :return: a list of dict
-    """
     dir0 = '/media/csc105/Data/dataset/AI-challenger/ai_challenger_caption_train_20170902/'
     with open(dir0 + 'caption_train_annotations_20170902.json', 'r') as f:
         data = json.load(f)
@@ -61,13 +69,10 @@ def convert_image_to_vector_train():
         image_vector = np.array(net.blobs[layer_name].data[0]).reshape([-1])  # remember transfer into array first!
         image_id2feature[image_id] = image_vector
 
-    pickle.dump(image_id2feature, open('data/ai/train_{:d}.pkl'.format(len(image_ids)), 'wb'), -1)
+    pickle.dump(image_id2feature, open('data/ai/img_vector_train_{:d}.pkl'.format(len(image_ids)), 'wb'), -1)
 
 
 def convert_image_to_vector_val():
-    """
-    :return: a list of dict --> {image_id: image_feature}
-    """
     dir0 = '/media/csc105/Data/dataset/AI-challenger/ai_challenger_caption_validation_20170910/'
     with open(dir0 + 'caption_validation_annotations_20170910.json', 'r') as f:
         data = json.load(f)
@@ -81,9 +86,24 @@ def convert_image_to_vector_val():
         image_vector = np.array(net.blobs[layer_name].data[0]).reshape([-1])  # remember transfer into array first!
         image_id2feature[image_id] = image_vector
 
-    pickle.dump(image_id2feature, open('data/ai/val_{:d}.pkl'.format(len(image_ids)), 'wb'), -1)
+    pickle.dump(image_id2feature, open('data/ai/img_vector_val_{:d}.pkl'.format(len(image_ids)), 'wb'), -1)
+
+
+def convert_image_to_vector_test():
+    dir0 = '/media/csc105/Data/dataset/AI-challenger/ai_challenger_caption_test1_20170923/caption_test1_images_20170923/'
+    image_path = os.listdir(dir0)
+    image_path.sort()
+    image_id2feature = dict()
+    for image_id in tqdm(image_path):
+        input_image = caffe.io.load_image(dir0 + image_id)
+        prediction = net.predict([input_image], oversample=False)
+        image_vector = np.array(net.blobs[layer_name].data[0]).reshape([-1])  # remember transfer into array first!
+        image_id2feature[image_id] = image_vector
+
+    pickle.dump(image_id2feature, open('data/ai/img_vector_test_{:d}.pkl'.format(len(image_path)), 'wb'), -1)
 
 
 if __name__ == "__main__":
-    convert_image_to_vector_train()
-    convert_image_to_vector_val()
+    # convert_image_to_vector_train()
+    # convert_image_to_vector_val()
+    convert_image_to_vector_test()
