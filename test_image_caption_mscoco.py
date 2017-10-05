@@ -79,6 +79,8 @@ class Net(object):
         self.init_all = tf.initialize_all_variables()
 
     def generate_caption(self, sess, img_feature):
+        # <SOS>: 3591
+        # <EOS>: 3339
         img_template = np.zeros([FLAGS.batch_size, FLAGS.img_dim])
         img_template[0, :] = img_feature
         sent_input = np.ones([FLAGS.batch_size, 1]) * 3591  # <SOS>  # [bs, 1]->

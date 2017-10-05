@@ -7,7 +7,6 @@ Creat Time: 2017-09-26 16:44:48
 Program: 
 Description: 
 """
-
 import tensorflow as tf
 import tensorflow.contrib.slim as slim
 import random
@@ -179,42 +178,35 @@ def main(_):
     saver = tf.train.Saver(max_to_keep=FLAGS.epoch_max // FLAGS.epoch_save)
     with tf.Session(config=model.tf_config) as sess:
         writer_train = tf.summary.FileWriter(dir_log_train, sess.graph)
-        # writer_val = tf.summary.FileWriter(dir_log_val, sess.graph)
 
         # 1. train from scratch
         # sess.run(model.init_all)
 
         # 2. restore
         saver.restore(sess, dir_restore)
-        global_iter = 0
         for epoch in range(FLAGS.epoch_max):
             lr_decay = 0.1 ** (epoch / FLAGS.epoch_lr_decay)
             lr = FLAGS.lr_base * lr_decay
+            iter_per_epoch = len_batches
             for iteration, (x1_t, x2_t) in enumerate(generate_batch(batches, caption_id2sentence,
-                                                                          caption_id2image_id, image_id2feature)):
+                                                                    caption_id2image_id, image_id2feature)):
+                global_iter = epoch * iter_per_epoch + iteration
                 time_start = time.time()
                 feed_dicts_t = {model.x1: x1_t, model.x2: x2_t, model.lr: lr, model.kp: 0.75}
                 sess.run(model.train_op, feed_dicts_t)
 
                 # display
-                if not (iteration+1) % 1:
+                if not (iteration+1) % 5:
                     merged_out_t, loss_out_t = sess.run([model.summary_merge, model.loss], feed_dicts_t)
                     writer_train.add_summary(merged_out_t, global_iter+1)
-                    hour_per_epoch = len_batches * ((time.time() - time_start) / 3600)
-                    print('%.2f h/epoch, epoch %03d/%03d, iter %04d/%04d, lr %.5f, loss: %.5f' %
-                          (hour_per_epoch, epoch+1, FLAGS.epoch_max, iteration+1, len_batches, lr, loss_out_t))
-
-                # if not (iteration+1) % 10:
-                #     feed_dicts_v = {model.x1: x1_v, model.x2: x2_v, model.kp: 1.0}
-                #     merged_out_v, loss_out_v = sess.run([model.summary_merge, model.loss], feed_dicts_v)
-                #     writer_val.add_summary(merged_out_v, global_iter + 1)
-                #     print('****val loss**** {:.5f}'.format(loss_out_v))
+                    hour_per_epoch = iter_per_epoch * ((time.time() - time_start) / 3600) / 5
+                    print('%.2f h/epoch, epoch %03d/%03d, iter %04d/%04d, lr %.7f, loss: %.5f' %
+                          (hour_per_epoch, epoch+1, FLAGS.epoch_max, iteration+1, iter_per_epoch, lr, loss_out_t))
 
                 # save
-                if not (epoch+1) % FLAGS.epoch_save:
+                if not (global_iter+1) % (FLAGS.epoch_save * iter_per_epoch):
+                    print 'save model...'
                     saver.save(sess, (dir_model + '/model'), global_step=epoch+1)
-
-                global_iter += 1
 
 
 if __name__ == "__main__":
