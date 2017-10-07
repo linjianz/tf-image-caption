@@ -13,8 +13,8 @@ preprocess_caption_mscoco.py
 
 - train & test  
 
-train_image_caption_mscoco.py  
-test_image_caption_mscoco.py  
+train_NIC_mscoco.py  
+test_NIC_mscoco.py  
 
 ### Result
 ![](http://ogmp8tdqb.bkt.clouddn.com//17-10-4/86622994.jpg)  
@@ -51,8 +51,8 @@ preprocess_caption_ai.py
 
 - train & test  
 
-train_image_caption_ai.py  
-test_image_caption_ai.py  
+train_NIC_ai.py  
+test_NIC_ai.py  
 
 ### Result
 20 epoches  
