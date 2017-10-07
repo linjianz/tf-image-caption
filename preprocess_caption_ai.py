@@ -144,5 +144,6 @@ def pre_process_caption_val():
 if __name__ == '__main__':
     # 1. save index2token
     # save_index2token()
+    # pre_process_caption_val()
+    print 'sa'
 
-    pre_process_caption_val()
